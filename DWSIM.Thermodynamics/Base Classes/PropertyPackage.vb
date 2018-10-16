@@ -4467,7 +4467,8 @@ redirect2:                      result = Me.FlashBase.Flash_PS(RET_VMOL(Phase.Mi
 
                         If Not TypeOf Me.FlashBase Is Auxiliary.FlashAlgorithms.NestedLoops3PV3 And
                             Not TypeOf Me.FlashBase Is Auxiliary.FlashAlgorithms.GibbsMinimization3P And
-                            Not TypeOf Me.FlashBase Is Auxiliary.FlashAlgorithms.BostonFournierInsideOut3P Then
+                            Not TypeOf Me.FlashBase Is Auxiliary.FlashAlgorithms.BostonFournierInsideOut3P And
+                            Not TypeOf Me.FlashBase Is Auxiliary.FlashAlgorithms.NestedLoopsSVLLE Then
 
                             Throw New Exception(Calculator.GetLocalString("UnsuitableFlashAlgorithmSelected"))
 
@@ -4483,14 +4484,17 @@ redirect2:                      result = Me.FlashBase.Flash_PS(RET_VMOL(Phase.Mi
                             For i = 0 To 25
                                 tit = tf + (ti - tf) / 25 * i
                                 If bw IsNot Nothing Then If bw.CancellationPending Then Exit For Else bw.ReportProgress(0, "LLE (" & i + 1 & "/26)")
-                                result = Me.FlashBase.Flash_PT(New Double() {uim * dx, 1 - uim * dx}, P, tit, Me)
-                                If result(5) > 0.0# Then
-                                    If Abs(result(2)(0) - result(6)(0)) > 0.01 Then
-                                        px1l1.Add(result(2)(0))
-                                        px1l2.Add(result(6)(0))
-                                        py3.Add(tit)
+                                Try
+                                    result = Me.FlashBase.Flash_PT(New Double() {uim * dx, 1 - uim * dx}, P, tit, Me)
+                                    If result(5) > 0.0# Then
+                                        If Abs(result(2)(0) - result(6)(0)) > 0.01 Then
+                                            px1l1.Add(result(2)(0))
+                                            px1l2.Add(result(6)(0))
+                                            py3.Add(tit)
+                                        End If
                                     End If
-                                End If
+                                Catch ex As Exception
+                                End Try
                             Next
                         End If
                     End If
