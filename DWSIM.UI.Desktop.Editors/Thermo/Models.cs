@@ -207,11 +207,6 @@ namespace DWSIM.UI.Desktop.Editors
                                                                     }
                                                                     else
                                                                     {
-                                                                        //if (Application.Instance.Platform.IsMac)
-                                                                        //{
-                                                                        //    flowsheet.ShowMessage("Sorry, editing this Property Package is not yet possible on the macOS platform.", IFlowsheet.MessageType.GeneralError);
-                                                                        //    return;
-                                                                        //}
                                                                         Application.Instance.Invoke(() => { pp.DisplayEditingForm(); });
                                                                     }
                                                                 },

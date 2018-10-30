@@ -220,6 +220,18 @@
     <Compile Include="Editing Forms\Property Packages\FormConfigCAPEOPENPPackage.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Editing Forms\Property Packages\FormConfigCoolPropIncompMixture.Designer.vb">
+      <DependentUpon>FormConfigCoolPropIncompMixture.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Editing Forms\Property Packages\FormConfigCoolPropIncompMixture.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Editing Forms\Property Packages\FormConfigCoolPropIncompFluid.Designer.vb">
+      <DependentUpon>FormConfigCoolPropIncompFluid.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Editing Forms\Property Packages\FormConfigCoolPropIncompFluid.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Editing Forms\Property Packages\FormConfigExUNIQUAC.designer.vb">
       <DependentUpon>FormConfigExUNIQUAC.vb</DependentUpon>
     </Compile>
@@ -269,6 +281,8 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Flash Algorithms\CAPEOPEN_Equilibrium_Server.vb" />
+    <Compile Include="Flash Algorithms\CoolPropIncompressibleMixture.vb" />
+    <Compile Include="Flash Algorithms\CoolPropIncompressiblePure.vb" />
     <Compile Include="Flash Algorithms\NestedLoopsSVLLE.vb" />
     <Compile Include="Flash Algorithms\SteamTables.vb" />
     <Compile Include="Helper Classes\ConsoleRedirection.vb" />
@@ -336,6 +350,8 @@
     <Compile Include="Property Packages\CoolProp.vb" />
     <Compile Include="Models\ChaoSeader.vb" />
     <Compile Include="Models\ExtendedUNIQUAC.vb" />
+    <Compile Include="Property Packages\CoolPropIncompressibleMixture.vb" />
+    <Compile Include="Property Packages\CoolPropIncompressiblePure.vb" />
     <Compile Include="Property Packages\ExtendedUNIQUAC.vb" />
     <Compile Include="Property Packages\GraysonStreed.vb" />
     <Compile Include="Models\GraysonStreed.vb" />
@@ -444,6 +460,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Editing Forms\Property Packages\FormConfigCAPEOPENPPackage.resx">
       <DependentUpon>FormConfigCAPEOPENPPackage.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Editing Forms\Property Packages\FormConfigCoolPropIncompMixture.en.resx">
+      <DependentUpon>FormConfigCoolPropIncompMixture.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Editing Forms\Property Packages\FormConfigCoolPropIncompMixture.resx">
+      <DependentUpon>FormConfigCoolPropIncompMixture.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Editing Forms\Property Packages\FormConfigCoolPropIncompFluid.en.resx">
+      <DependentUpon>FormConfigCoolPropIncompFluid.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Editing Forms\Property Packages\FormConfigCoolPropIncompFluid.resx">
+      <DependentUpon>FormConfigCoolPropIncompFluid.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Editing Forms\Property Packages\FormConfigExUNIQUAC.de.resx">
       <DependentUpon>FormConfigExUNIQUAC.vb</DependentUpon>
@@ -696,6 +724,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\Databases\coolprop.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Databases\CoolPropIncompMixtures.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Databases\CoolPropIncompPure.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>

@@ -1828,13 +1828,13 @@ Namespace PropertyPackages
                 Case Interfaces.Enums.FlashCalculationType.PressureVaporFraction
                     Return Me.FlashBase.CalculateEquilibrium(FlashSpec.P, FlashSpec.VAP, val1, val2, Me, mixmolefrac, initialKval, initialestimate)
                 Case Interfaces.Enums.FlashCalculationType.TemperatureEnthalpy
-                    Return Me.FlashBase.CalculateEquilibrium(FlashSpec.P, FlashSpec.H, val1, val2, Me, mixmolefrac, initialKval, initialestimate)
+                    Return Me.FlashBase.CalculateEquilibrium(FlashSpec.T, FlashSpec.H, val1, val2, Me, mixmolefrac, initialKval, initialestimate)
                 Case Interfaces.Enums.FlashCalculationType.TemperatureEntropy
-                    Return Me.FlashBase.CalculateEquilibrium(FlashSpec.P, FlashSpec.S, val1, val2, Me, mixmolefrac, initialKval, initialestimate)
+                    Return Me.FlashBase.CalculateEquilibrium(FlashSpec.T, FlashSpec.S, val1, val2, Me, mixmolefrac, initialKval, initialestimate)
                 Case Interfaces.Enums.FlashCalculationType.TemperatureSolidFraction
-                    Return Me.FlashBase.CalculateEquilibrium(FlashSpec.P, FlashSpec.SF, val1, val2, Me, mixmolefrac, initialKval, initialestimate)
+                    Return Me.FlashBase.CalculateEquilibrium(FlashSpec.T, FlashSpec.SF, val1, val2, Me, mixmolefrac, initialKval, initialestimate)
                 Case Interfaces.Enums.FlashCalculationType.TemperatureVaporFraction
-                    Return Me.FlashBase.CalculateEquilibrium(FlashSpec.P, FlashSpec.VAP, val1, val2, Me, mixmolefrac, initialKval, initialestimate)
+                    Return Me.FlashBase.CalculateEquilibrium(FlashSpec.T, FlashSpec.VAP, val1, val2, Me, mixmolefrac, initialKval, initialestimate)
                 Case Else
                     Throw New NotImplementedException
             End Select
@@ -2390,7 +2390,7 @@ Namespace PropertyPackages
                             If Not T.IsValid Or Not H.IsValid Then Throw New ArgumentException("PH Flash: " & Calculator.GetLocalString("ErrorInvalidFlashSpecValue"))
                             'If Not T.IsPositive Then Throw New ArgumentException("PH Flash: " & Calculator.GetLocalString("ErrorInvalidFlashSpecValue"))
 
-                            If Me.AUX_IS_SINGLECOMP(Phase.Mixture) And Me.ComponentName <> "FPROPS" Then
+                            If Me.AUX_IS_SINGLECOMP(Phase.Mixture) And Not Me.ComponentName.Contains("Incompressible") Then
 
                                 Dim brentsolverT As New BrentOpt.Brent
                                 brentsolverT.DefineFuncDelegate(AddressOf EnthalpyTx)
@@ -7538,6 +7538,19 @@ Final3:
 
         End Function
 
+        Public Function RET_UnitaryVector() As Double()
+
+            Dim val(Me.CurrentMaterialStream.Phases(0).Compounds.Count - 1) As Double
+            Dim subst As Interfaces.ICompound
+            Dim i As Integer = 0
+            For Each subst In Me.CurrentMaterialStream.Phases(0).Compounds.Values
+                val(i) = 1.0#
+                i += 1
+            Next
+            Return val
+
+        End Function
+
         Public Function RET_PHASECODE(ByVal phaseID As Integer) As PropertyPackages.Phase
             Select Case phaseID
                 Case 0
@@ -7682,7 +7695,7 @@ Final3:
 
         End Function
 
-        Public Function AUX_IS_SINGLECOMP(ByVal Phase As Phase) As Boolean
+        Public Overridable Function AUX_IS_SINGLECOMP(ByVal Phase As Phase) As Boolean
 
             Dim c As Integer, bo As Boolean
 
@@ -10645,32 +10658,32 @@ Final3:
             Dim ci As Globalization.CultureInfo = Globalization.CultureInfo.InvariantCulture
 
             Try
-                Me.UniqueID = (From el As XElement In data Select el Where el.Name = "ID").SingleOrDefault.Value
-                Me.Tag = (From el As XElement In data Select el Where el.Name = "Tag").SingleOrDefault.Value
+                Me.UniqueID = (From el As XElement In data Select el Where el.Name = "ID").FirstOrDefault.Value
+                Me.Tag = (From el As XElement In data Select el Where el.Name = "Tag").FirstOrDefault.Value
             Catch ex As Exception
             End Try
-            Me.ComponentName = (From el As XElement In data Select el Where el.Name = "ComponentName").SingleOrDefault.Value
-            Me.ComponentDescription = (From el As XElement In data Select el Where el.Name = "ComponentDescription").SingleOrDefault.Value
+            Me.ComponentName = (From el As XElement In data Select el Where el.Name = "ComponentName").FirstOrDefault.Value
+            Me.ComponentDescription = (From el As XElement In data Select el Where el.Name = "ComponentDescription").FirstOrDefault.Value
             Try
-                Me._tpseverity = (From el As XElement In data Select el Where el.Name = "TPSeverity").SingleOrDefault.Value
-                Me._tpcompids = XMLSerializer.XMLSerializer.StringToArray2((From el As XElement In data Select el Where el.Name = "TPCompIDs").SingleOrDefault.Value, ci, Type.GetType("System.String"))
+                Me._tpseverity = (From el As XElement In data Select el Where el.Name = "TPSeverity").FirstOrDefault.Value
+                Me._tpcompids = XMLSerializer.XMLSerializer.StringToArray2((From el As XElement In data Select el Where el.Name = "TPCompIDs").FirstOrDefault.Value, ci, Type.GetType("System.String"))
             Catch ex As Exception
             End Try
 
             Dim jsonoptions As New JsonSerializerSettings With {.StringEscapeHandling = StringEscapeHandling.EscapeHtml, .Formatting = Formatting.Indented}
 
             Try
-                ForcedSolids = JsonConvert.DeserializeObject(Of List(Of String))((From el As XElement In data Select el Where el.Name = "ForcedSolids").SingleOrDefault.Value)
+                ForcedSolids = JsonConvert.DeserializeObject(Of List(Of String))((From el As XElement In data Select el Where el.Name = "ForcedSolids").FirstOrDefault.Value)
             Catch ex As Exception
             End Try
 
             Try
-                PropertyOverrides = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))((From el As XElement In data Select el Where el.Name = "PropertyOverrides").SingleOrDefault.Value)
+                PropertyOverrides = JsonConvert.DeserializeObject(Of Dictionary(Of String, String))((From el As XElement In data Select el Where el.Name = "PropertyOverrides").FirstOrDefault.Value)
             Catch ex As Exception
             End Try
 
             Try
-                For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "Parameters").SingleOrDefault.Elements.ToList
+                For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "Parameters").FirstOrDefault.Elements.ToList
                     If m_par.ContainsKey(xel.@ID) Then m_par(xel.@ID) = Double.Parse(xel.@Value, ci) Else m_par.Add(xel.@ID, Double.Parse(xel.@Value, ci))
                 Next
             Catch ex As Exception
@@ -10683,7 +10696,7 @@ Final3:
                     Try
                         Dim pp As PengRobinsonPropertyPackage = Me
                         'pp.m_pr.InteractionParameters.Clear()
-                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").SingleOrDefault.Elements.ToList
+                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").FirstOrDefault.Elements.ToList
                             Dim ip As New Auxiliary.PR_IPData() With {.kij = Double.Parse(xel.@Value, ci)}
                             Dim dic As New Dictionary(Of String, Auxiliary.PR_IPData)
                             dic.Add(xel.@Compound2, ip)
@@ -10705,7 +10718,7 @@ Final3:
 
                     Dim pp As PRSV2PropertyPackage = Me
                     'pp.m_pr.InteractionParameters.Clear()
-                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").SingleOrDefault.Elements.ToList
+                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").FirstOrDefault.Elements.ToList
                         Dim ip As New Auxiliary.PRSV2_IPData() With {.id1 = xel.@Compound1, .id2 = xel.@Compound2, .kij = Double.Parse(xel.@Value, ci)}
                         Dim dic As New Dictionary(Of String, Auxiliary.PRSV2_IPData)
                         dic.Add(xel.@Compound2, ip)
@@ -10724,7 +10737,7 @@ Final3:
 
                     Dim pp As PRSV2VLPropertyPackage = Me
                     'pp.m_pr.InteractionParameters.Clear()
-                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").SingleOrDefault.Elements.ToList
+                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").FirstOrDefault.Elements.ToList
                         Dim ip As New Auxiliary.PRSV2_IPData() With {.id1 = xel.@Compound1, .id2 = xel.@Compound2, .kij = Double.Parse(xel.@kij, ci), .kji = Double.Parse(xel.@kji, ci)}
                         Dim dic As New Dictionary(Of String, Auxiliary.PRSV2_IPData)
                         dic.Add(xel.@Compound2, ip)
@@ -10744,7 +10757,7 @@ Final3:
                     Try
                         Dim pp As SRKPropertyPackage = Me
                         'pp.m_pr.InteractionParameters.Clear()
-                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").SingleOrDefault.Elements.ToList
+                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").FirstOrDefault.Elements.ToList
                             Dim ip As New Auxiliary.PR_IPData() With {.kij = Double.Parse(xel.@Value, ci)}
                             Dim dic As New Dictionary(Of String, Auxiliary.PR_IPData)
                             dic.Add(xel.@Compound2, ip)
@@ -10766,7 +10779,7 @@ Final3:
 
                     Dim pp As PengRobinsonLKPropertyPackage = Me
                     'pp.m_pr.InteractionParameters.Clear()
-                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").SingleOrDefault.Elements.ToList
+                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").FirstOrDefault.Elements.ToList
                         Dim ip As New Auxiliary.PR_IPData() With {.kij = Double.Parse(xel.@Value, ci)}
                         Dim dic As New Dictionary(Of String, Auxiliary.PR_IPData)
                         dic.Add(xel.@Compound2, ip)
@@ -10786,7 +10799,7 @@ Final3:
 
                     Dim pp As UNIFACPropertyPackage = Me
                     'pp.m_pr.InteractionParameters.Clear()
-                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").SingleOrDefault.Elements.ToList
+                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").FirstOrDefault.Elements.ToList
                         Dim ip As New Auxiliary.PR_IPData() With {.kij = Double.Parse(xel.@Value, ci)}
                         Dim dic As New Dictionary(Of String, Auxiliary.PR_IPData)
                         dic.Add(xel.@Compound2, ip)
@@ -10805,7 +10818,7 @@ Final3:
 
                     Dim pp As UNIFACLLPropertyPackage = Me
                     'pp.m_pr.InteractionParameters.Clear()
-                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").SingleOrDefault.Elements.ToList
+                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").FirstOrDefault.Elements.ToList
                         Dim ip As New Auxiliary.PR_IPData() With {.kij = Double.Parse(xel.@Value, ci)}
                         Dim dic As New Dictionary(Of String, Auxiliary.PR_IPData)
                         dic.Add(xel.@Compound2, ip)
@@ -10825,7 +10838,7 @@ Final3:
                     Try
                         Dim pp As NRTLPropertyPackage = Me
                         'pp.m_pr.InteractionParameters.Clear()
-                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters_PR").SingleOrDefault.Elements.ToList
+                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters_PR").FirstOrDefault.Elements.ToList
                             Dim ip As New Auxiliary.PR_IPData() With {.kij = Double.Parse(xel.@Value, ci)}
                             Dim dic As New Dictionary(Of String, Auxiliary.PR_IPData)
                             dic.Add(xel.@Compound2, ip)
@@ -10841,7 +10854,7 @@ Final3:
                         Next
 
                         'pp.m_uni.InteractionParameters.Clear()
-                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters_NRTL").SingleOrDefault.Elements.ToList
+                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters_NRTL").FirstOrDefault.Elements.ToList
                             Dim ip As New Auxiliary.NRTL_IPData() With {.ID1 = xel.@ID1, .ID2 = xel.@ID2, .A12 = Double.Parse(xel.@A12, ci), .A21 = Double.Parse(xel.@A21, ci),
                                                                         .B12 = Double.Parse(xel.@B12, ci), .B21 = Double.Parse(xel.@B21, ci),
                                                                         .C12 = Double.Parse(xel.@C12, ci), .C21 = Double.Parse(xel.@C21, ci),
@@ -10869,7 +10882,7 @@ Final3:
                         Dim pp As UNIQUACPropertyPackage = Me
 
                         'pp.m_pr.InteractionParameters.Clear()
-                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters_PR").SingleOrDefault.Elements.ToList
+                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters_PR").FirstOrDefault.Elements.ToList
                             Dim ip As New Auxiliary.PR_IPData() With {.kij = Double.Parse(xel.@Value, ci)}
                             Dim dic As New Dictionary(Of String, Auxiliary.PR_IPData)
                             dic.Add(xel.@Compound2, ip)
@@ -10885,7 +10898,7 @@ Final3:
                         Next
 
                         'pp.m_uni.InteractionParameters.Clear()
-                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters_UNIQUAC").SingleOrDefault.Elements.ToList
+                        For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters_UNIQUAC").FirstOrDefault.Elements.ToList
                             Dim ip As New Auxiliary.UNIQUAC_IPData() With {.ID1 = xel.@ID1, .ID2 = xel.@ID2, .A12 = Double.Parse(xel.@A12, ci), .A21 = Double.Parse(xel.@A21, ci),
                                                                            .B12 = Double.Parse(xel.@B12, ci), .B21 = Double.Parse(xel.@B21, ci),
                                                                            .C12 = Double.Parse(xel.@C12, ci), .C21 = Double.Parse(xel.@C21, ci)}
@@ -10910,7 +10923,7 @@ Final3:
 
                     Dim pp As MODFACPropertyPackage = Me
                     'pp.m_pr.InteractionParameters.Clear()
-                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").SingleOrDefault.Elements.ToList
+                    For Each xel As XElement In (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").FirstOrDefault.Elements.ToList
                         Dim ip As New Auxiliary.PR_IPData() With {.kij = Double.Parse(xel.@Value, ci)}
                         Dim dic As New Dictionary(Of String, Auxiliary.PR_IPData)
                         dic.Add(xel.@Compound2, ip)
@@ -10931,7 +10944,7 @@ Final3:
                         Dim pp As LKPPropertyPackage = Me
                         'pp.m_pr.InteractionParameters.Clear()
 
-                        Dim el = (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").SingleOrDefault
+                        Dim el = (From xel2 As XElement In data Select xel2 Where xel2.Name = "InteractionParameters").FirstOrDefault
 
                         If Not el Is Nothing Then
 
