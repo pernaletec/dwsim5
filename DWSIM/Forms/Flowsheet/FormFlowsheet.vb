@@ -44,10 +44,10 @@ Public Class FormFlowsheet
 
     'DWSIM IFlowsheet interface
     Implements Interfaces.IFlowsheet, Interfaces.IFlowsheetBag, Interfaces.IFlowsheetGUI, Interfaces.IFlowsheetCalculationQueue
+
     Public Shadows Const ClassId As String = "0294AA84-9269-46CE-A854-BEF64539287B"
     Public Shadows Const InterfaceId As String = "F405F679-7C8F-4737-BE58-738624220B7D"
     Public Shadows Const EventsId As String = "5E0BA6EE-9025-4C33-A896-E061F32E93BF"
-
 
 #Region "    Variable Declarations "
 
@@ -937,7 +937,11 @@ Public Class FormFlowsheet
     Public Sub tsbCalc_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
         GlobalSettings.Settings.TaskCancellationTokenSource = Nothing
         If My.Computer.Keyboard.ShiftKeyDown Then GlobalSettings.Settings.CalculatorBusy = False
-        FlowsheetSolver.FlowsheetSolver.SolveFlowsheet(Me, My.Settings.SolverMode)
+        If My.Computer.Keyboard.CtrlKeyDown And My.Computer.Keyboard.AltKeyDown Then
+            FlowsheetSolver.FlowsheetSolver.SolveFlowsheet(Me, My.Settings.SolverMode, ChangeCalcOrder:=True)
+        Else
+            FlowsheetSolver.FlowsheetSolver.SolveFlowsheet(Me, My.Settings.SolverMode)
+        End If
     End Sub
 
     Private Sub AnaliseDeSensibilidadeToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles AnaliseDeSensibilidadeToolStripMenuItem.Click
@@ -948,15 +952,6 @@ Public Class FormFlowsheet
     Private Sub MultivariateOptimizerToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MultivariateOptimizerToolStripMenuItem.Click
         Me.FormOptimization0 = New FormOptimization
         Me.FormOptimization0.Show(Me.dckPanel)
-    End Sub
-
-    Private Sub GerenciadorDeReacoesToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GerenciadorDeReacoesToolStripMenuItem.Click
-        If FrmReacMan Is Nothing OrElse FrmReacMan.IsDisposed Then
-            FrmReacMan = New FormReacManager
-            FrmReacMan.Show(Me.dckPanel)
-        Else
-            FrmReacMan.Activate()
-        End If
     End Sub
 
     Private Sub CaracterizacaoDePetroleosFracoesC7ToolStripMenuItem_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CaracterizacaoDePetroleosFracoesC7ToolStripMenuItem.Click
@@ -2501,7 +2496,7 @@ Public Class FormFlowsheet
         Return Me.SimulationObjects(id)
     End Function
 
-    Public Sub RequestCalculation(Optional sender As ISimulationObject = Nothing) Implements IFlowsheet.RequestCalculation
+    Public Sub RequestCalculation(Optional sender As ISimulationObject = Nothing, Optional changecalcorder As Boolean = False) Implements IFlowsheet.RequestCalculation
 
         If Not sender Is Nothing Then
             FlowsheetSolver.FlowsheetSolver.CalculateObject(Me, sender.Name)
@@ -2766,15 +2761,6 @@ Public Class FormFlowsheet
         Me.FrmStSim1.TabControl1.SelectedTab = Me.FrmStSim1.TabPage2
     End Sub
 
-    Private Sub tsbmiReactions_Click(sender As Object, e As EventArgs)
-        If FrmReacMan Is Nothing OrElse FrmReacMan.IsDisposed Then
-            FrmReacMan = New FormReacManager
-            FrmReacMan.Show(Me.dckPanel)
-        Else
-            FrmReacMan.Activate()
-        End If
-    End Sub
-
     Private Sub AjudaToolStripMenuItem_Click(sender As Object, e As EventArgs)
         Process.Start("https://msdn.microsoft.com/en-us/library/dwhawy9k(v=vs.110).aspx")
     End Sub
@@ -2932,6 +2918,7 @@ Public Class FormFlowsheet
     Public Sub tsbAtivar_CheckedChanged(sender As Object, e As EventArgs) Handles tsbAtivar.CheckedChanged
         GlobalSettings.Settings.CalculatorActivated = tsbAtivar.Checked
         tsbCalc.Enabled = tsbAtivar.Checked
+        tsbCalcF.Enabled = tsbAtivar.Checked
         tsbAbortCalc.Enabled = tsbAtivar.Checked
         tsbSimultAdjustSolver.Enabled = tsbAtivar.Checked
     End Sub
@@ -3021,4 +3008,16 @@ Public Class FormFlowsheet
     Public Function GetFlowsheetSurfaceHeight() As Integer Implements IFlowsheet.GetFlowsheetSurfaceHeight
         Return FormSurface.SplitContainer1.Panel1.Height
     End Function
+
+    Public Function ChangeCalculationOrder(objects As List(Of String)) As List(Of String) Implements IFlowsheet.ChangeCalculationOrder
+
+        Dim frm As New SharedClasses.FormCustomCalcOrder
+        frm.Flowsheet = Me
+        frm.ItemList = objects
+        frm.ShowDialog(Me)
+
+        Return frm.NewItemList
+
+    End Function
+
 End Class

@@ -389,13 +389,16 @@
     <value>CAPE-OPEN Equilbrium Server</value>
   </data>
   <data name="cbImmiscible.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 21</value>
+    <value>165, 21</value>
   </data>
   <data name="Label10.Size" type="System.Drawing.Size, System.Drawing">
     <value>109, 13</value>
   </data>
   <data name="Label10.Text" xml:space="preserve">
     <value>Immiscible Compound</value>
+  </data>
+  <data name="GroupBox7.Size" type="System.Drawing.Size, System.Drawing">
+    <value>618, 64</value>
   </data>
   <data name="GroupBox7.Text" xml:space="preserve">
     <value>Liquid-Liquid Immiscibility</value>
@@ -405,6 +408,19 @@
   </data>
   <data name="TabPageIM.Text" xml:space="preserve">
     <value>Immiscibility</value>
+  </data>
+  <data name="GroupBox8.Size" type="System.Drawing.Size, System.Drawing">
+    <value>617, 285</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="TabPageUD.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 3, 3, 3</value>
+  </data>
+  <data name="TabPageUD.Size" type="System.Drawing.Size, System.Drawing">
+    <value>633, 296</value>
+  </data>
+  <data name="TabPageUD.Text" xml:space="preserve">
+    <value>User-Defined Functions</value>
   </data>
   <data name="TabControl1.Size" type="System.Drawing.Size, System.Drawing">
     <value>641, 322</value>

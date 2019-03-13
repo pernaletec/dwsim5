@@ -298,12 +298,12 @@ Imports System.Dynamic
 
     Public Property RedirectMessages As Boolean Implements IFlowsheet.RedirectMessages
 
-    Public Sub RequestCalculation(Optional sender As ISimulationObject = Nothing) Implements IFlowsheet.RequestCalculation
+    Public Sub RequestCalculation(Optional sender As ISimulationObject = Nothing, Optional ChangeCalculationOrder As Boolean = False) Implements IFlowsheet.RequestCalculation
 
         If Not sender Is Nothing Then
             FlowsheetSolver.FlowsheetSolver.CalculateObject(Me, sender.Name)
         Else
-            FlowsheetSolver.FlowsheetSolver.SolveFlowsheet(Me, GlobalSettings.Settings.SolverMode)
+            FlowsheetSolver.FlowsheetSolver.SolveFlowsheet(Me, GlobalSettings.Settings.SolverMode, ChangeCalcOrder:=ChangeCalculationOrder)
         End If
 
     End Sub
@@ -1955,6 +1955,10 @@ Label_00CC:
         EUQPP.ComponentName = "Extended UNIQUAC (Aqueous Electrolytes)"
         AvailablePropertyPackages.Add(EUQPP.ComponentName.ToString, EUQPP)
 
+        Dim ENQPP As New ElectrolyteNRTLPropertyPackage()
+        ENQPP.ComponentName = "Electrolyte NRTL (Aqueous Electrolytes)"
+        AvailablePropertyPackages.Add(ENQPP.ComponentName.ToString, ENQPP)
+
         Dim BOPP As BlackOilPropertyPackage = New BlackOilPropertyPackage()
         BOPP.ComponentName = "Black Oil"
         AvailablePropertyPackages.Add(BOPP.ComponentName.ToString, BOPP)
@@ -2224,5 +2228,22 @@ Label_00CC:
     Public Function GetFlowsheetSurfaceHeight() As Integer Implements IFlowsheet.GetFlowsheetSurfaceHeight
         Return FlowsheetSurface.Size.Height
     End Function
+
+    Public Function ChangeCalculationOrder(objects As List(Of String)) As List(Of String) Implements IFlowsheet.ChangeCalculationOrder
+
+        Dim olist As List(Of String) = objects
+
+        RunCodeOnUIThread(Sub()
+                              Dim frm As New SharedClasses.FormCustomCalcOrder
+                              frm.Flowsheet = Me
+                              frm.ItemList = objects
+                              frm.ShowDialog()
+                              olist = frm.NewItemList
+                          End Sub)
+
+        Return olist
+
+    End Function
+
 End Class
 

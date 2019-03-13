@@ -578,6 +578,11 @@ Public Class FormMain
 
         PropertyPackages.Add(EUQPP.ComponentName.ToString, EUQPP)
 
+        Dim ENQPP As New ElectrolyteNRTLPropertyPackage()
+        ENQPP.ComponentName = "Electrolyte NRTL (Aqueous Electrolytes)"
+
+        PropertyPackages.Add(ENQPP.ComponentName.ToString, ENQPP)
+
         Dim BOPP As BlackOilPropertyPackage = New BlackOilPropertyPackage()
         BOPP.ComponentName = "Black Oil"
         BOPP.ComponentDescription = DWSIM.App.GetLocalString("DescBOPP")
@@ -3708,6 +3713,10 @@ Label_00CC:
                 End If
             Next
         End If
+    End Sub
+
+    Private Sub PatronToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles PatronToolStripMenuItem.Click
+        System.Diagnostics.Process.Start("https://patreon.com/dwsim")
     End Sub
 
     Private Sub bgSaveBackup_RunWorkerCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.RunWorkerCompletedEventArgs) Handles bgSaveBackup.RunWorkerCompleted

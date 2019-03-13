@@ -70,7 +70,7 @@
 
     Sub CheckStatus()
 
-    Sub RequestCalculation(Optional ByVal sender As ISimulationObject = Nothing)
+    Sub RequestCalculation(Optional ByVal sender As ISimulationObject = Nothing, Optional ByVal ChangeCalculationOrder As Boolean = False)
 
     Function GetTranslatedString(text As String, locale As String) As String
 
@@ -152,6 +152,8 @@
 
     Function GetFlowsheetSurfaceHeight() As Integer
 
+    Function ChangeCalculationOrder(objects As List(Of String)) As List(Of String)
+
 End Interface
 
 ''' <summary>
@@ -213,7 +215,6 @@ End Interface
     Sub UpdateInterface()
 
     Sub UpdateInformation()
-
 
 End Interface
 

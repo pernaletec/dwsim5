@@ -195,6 +195,7 @@ namespace DWSIM.UI.Forms
             var btnOptions = new ButtonMenuItem { Text = "Flowsheet Settings", Image = new Bitmap(Eto.Drawing.Bitmap.FromResource(imgprefix + "icons8-sorting_options.png")), Shortcut = Keys.M | Application.Instance.AlternateModifier };
             var btnGlobalOptions = new ButtonMenuItem { Text = "Global Settings", Image = new Bitmap(Eto.Drawing.Bitmap.FromResource(imgprefix + "icons8-sorting_options.png")), Shortcut = Keys.G | Application.Instance.AlternateModifier };
             var btnSolve = new ButtonMenuItem { Text = "Solve Flowsheet", Image = new Bitmap(Eto.Drawing.Bitmap.FromResource(imgprefix + "icons8-play.png")), Shortcut = Keys.F5 };
+            var btnSolveC = new ButtonMenuItem { Text = "Solve Flowsheet (Custom Calculation Order)", Image = new Bitmap(Eto.Drawing.Bitmap.FromResource(imgprefix + "icons8-play.png")), Shortcut = Keys.F5 | Application.Instance.CommonModifier | Application.Instance.AlternateModifier };
 
             // actions
 
@@ -375,8 +376,9 @@ namespace DWSIM.UI.Forms
 
             btnGlobalOptions.Click += (sender, e) => ActGlobalOptions.Invoke();
 
-            btnSolve.Click += (sender, e) => SolveFlowsheet();
-            btnmSolve.Click += (sender, e) => SolveFlowsheet();
+            btnSolve.Click += (sender, e) => SolveFlowsheet(false);
+            btnmSolve.Click += (sender, e) => SolveFlowsheet(false);
+            btnSolveC.Click += (sender, e) => SolveFlowsheet(true);
 
             btnSave.Click += (sender, e) => ActSave.Invoke();
             btnmSave.Click += (sender, e) => ActSave.Invoke();
@@ -610,7 +612,7 @@ namespace DWSIM.UI.Forms
                     {
                         Menu.Items.Insert(3, new ButtonMenuItem { Text = "Setup", Items = { btnComps, btnBasis, btnOptions, btnGlobalOptions } });
                         Menu.Items.Insert(4, new ButtonMenuItem { Text = "Objects", Items = { btnObjects, btnInsertText, btnInsertTable, btnInsertMasterTable, btnInsertSpreadsheetTable, btnInsertChartObject } });
-                        Menu.Items.Insert(5, new ButtonMenuItem { Text = "Solver", Items = { btnSolve, chkSimSolver } });
+                        Menu.Items.Insert(5, new ButtonMenuItem { Text = "Solver", Items = { btnSolve, btnSolveC, chkSimSolver } });
                         Menu.Items.Insert(6, new ButtonMenuItem { Text = "Tools", Items = { btnSensAnalysis, btnOptimization, btnInspector } });
                         Menu.Items.Insert(7, new ButtonMenuItem { Text = "Utilities", Items = { btnUtilities_TrueCriticalPoint, btnUtilities_PhaseEnvelope, btnUtilities_BinaryEnvelope } });
                         Menu.Items.Insert(7, pluginsmenu);
@@ -620,7 +622,7 @@ namespace DWSIM.UI.Forms
                     {
                         Menu.Items.Add(new ButtonMenuItem { Text = "Setup", Items = { btnComps, btnBasis, btnOptions, btnGlobalOptions } });
                         Menu.Items.Add(new ButtonMenuItem { Text = "Objects", Items = { btnObjects, btnInsertText, btnInsertTable, btnInsertMasterTable, btnInsertSpreadsheetTable, btnInsertChartObject } });
-                        Menu.Items.Add(new ButtonMenuItem { Text = "Solver", Items = { btnSolve, chkSimSolver } });
+                        Menu.Items.Add(new ButtonMenuItem { Text = "Solver", Items = { btnSolve, btnSolveC, chkSimSolver } });
                         Menu.Items.Add(new ButtonMenuItem { Text = "Tools", Items = { btnSensAnalysis, btnOptimization, btnInspector } });
                         Menu.Items.Add(new ButtonMenuItem { Text = "Utilities", Items = { btnUtilities_TrueCriticalPoint, btnUtilities_PhaseEnvelope, btnUtilities_BinaryEnvelope } });
                         Menu.Items.Add(pluginsmenu);
@@ -631,7 +633,7 @@ namespace DWSIM.UI.Forms
                 case GlobalSettings.Settings.Platform.Windows:
                     Menu.Items.Add(new ButtonMenuItem { Text = "Setup", Items = { btnComps, btnBasis, btnOptions, btnGlobalOptions } });
                     Menu.Items.Add(new ButtonMenuItem { Text = "Objects", Items = { btnObjects, btnInsertText, btnInsertTable, btnInsertMasterTable, btnInsertSpreadsheetTable, btnInsertChartObject } });
-                    Menu.Items.Add(new ButtonMenuItem { Text = "Solver", Items = { btnSolve, chkSimSolver } });
+                    Menu.Items.Add(new ButtonMenuItem { Text = "Solver", Items = { btnSolve, btnSolveC, chkSimSolver } });
                     Menu.Items.Add(new ButtonMenuItem { Text = "Tools", Items = { btnSensAnalysis, btnOptimization, btnInspector } });
                     Menu.Items.Add(new ButtonMenuItem { Text = "Utilities", Items = { btnUtilities_TrueCriticalPoint, btnUtilities_PhaseEnvelope, btnUtilities_BinaryEnvelope } });
                     Menu.Items.Add(pluginsmenu);
@@ -1027,11 +1029,11 @@ namespace DWSIM.UI.Forms
 
             Shown += Flowsheet_Shown;
 
-            FlowsheetObject.HighLevelSolve = () => SolveFlowsheet();
+            FlowsheetObject.HighLevelSolve = () => SolveFlowsheet(false);
 
         }
 
-        public void SolveFlowsheet()
+        public void SolveFlowsheet(bool changecalcorder)
         {
             FlowsheetObject.UpdateSpreadsheet(() =>
             {
@@ -1047,7 +1049,7 @@ namespace DWSIM.UI.Forms
                     UpdateEditorPanels();
                 });
             });
-            FlowsheetObject.SolveFlowsheet(false);
+            FlowsheetObject.SolveFlowsheet(false, null, changecalcorder);
             FlowsheetObject.UpdateSpreadsheet(() =>
             {
                 Spreadsheet.EvaluateAll();
@@ -1430,7 +1432,7 @@ namespace DWSIM.UI.Forms
                                 var obj1 = FlowsheetObject.SimulationObjects[obj.Name];
                                 var obj2 = FlowsheetObject.GetSelectedFlowsheetSimulationObject(newtsmi.Text);
                                 ((Thermodynamics.Streams.MaterialStream)obj1).Assign((Thermodynamics.Streams.MaterialStream)obj2);
-                                SolveFlowsheet();
+                                SolveFlowsheet(false);
                             };
                             if (mstr.GraphicObject.Calculated) aitem1.Items.Add(newtsmi);
                         }
@@ -1511,11 +1513,49 @@ namespace DWSIM.UI.Forms
                 };
                 item0.Items.Add(menuitem);
             }
+            
+            var item1 = new ButtonMenuItem { Text = "Zoom All", Image = new Bitmap(Eto.Drawing.Bitmap.FromResource(imgprefix + "icons8-zoom_to_extents.png")) };
+            var item2 = new ButtonMenuItem { Text = "Default Zoom", Image = new Bitmap(Eto.Drawing.Bitmap.FromResource(imgprefix + "icons8-zoom_to_actual_size_filled.png")) };
 
-            deselctxmenu.Items.AddRange(new MenuItem[] { item0 });
+            item1.Click += (sender, e) => {
+                ActZoomFit.Invoke();
+            };
+
+            item2.Click += (sender, e) => {
+                ActZoomDefault.Invoke();
+            };
+
+            var item4 = new ButtonMenuItem { Text = "Copy as Image (100%)", Image = new Bitmap(Eto.Drawing.Bitmap.FromResource(imgprefix + "icons8-copy_2_filled.png")) };
+            var item5 = new ButtonMenuItem { Text = "Copy as Image (200%)", Image = new Bitmap(Eto.Drawing.Bitmap.FromResource(imgprefix + "icons8-copy_2_filled.png")) };
+            var item6 = new ButtonMenuItem { Text = "Copy as Image (300%)", Image = new Bitmap(Eto.Drawing.Bitmap.FromResource(imgprefix + "icons8-copy_2_filled.png")) };
+
+            item4.Click += (sender, e) => CopyAsImage(1);
+            item5.Click += (sender, e) => CopyAsImage(2);
+            item6.Click += (sender, e) => CopyAsImage(3);
+
+            deselctxmenu.Items.AddRange(new MenuItem[] { item0, item1, item2, item4, item5, item6 });
 
             return;
 
+        }
+
+        void CopyAsImage(int Zoom)
+        {
+            using (SkiaSharp.SKBitmap bmp = new SkiaSharp.SKBitmap(FlowsheetControl.Width * Zoom, FlowsheetControl.Height * Zoom))
+            {
+                using (SkiaSharp.SKCanvas canvas = new SkiaSharp.SKCanvas(bmp))
+                {
+                    canvas.Scale(Zoom);
+                    FlowsheetControl.FlowsheetSurface.UpdateCanvas(canvas);
+                    var d = SkiaSharp.SKImage.FromBitmap(bmp).Encode(SkiaSharp.SKEncodedImageFormat.Png, 100);
+                    using (System.IO.MemoryStream str = new MemoryStream())
+                    {
+                        d.SaveTo(str);
+                        Clipboard.Instance.Image = new Bitmap(str);
+                        FlowsheetObject.ShowMessage("The flowsheet was copied as an image to the clipboard.", Interfaces.IFlowsheet.MessageType.Information);
+                    }
+                }
+            }
         }
 
         void EditConnections()
